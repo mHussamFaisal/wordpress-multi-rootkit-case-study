@@ -9,14 +9,18 @@
 
 ---
 
-## 📋 Overview
+## 📋 Overview & Business Impact
 
-This repository documents a real-world incident response investigation and provides the **sanitized Server-Side Remediation Toolkit** used to eradicate five concurrent malware families from a production WordPress + custom PHP platform on shared/cPanel Linux hosting.
+This repository documents a real-world incident response investigation and provides the **sanitized Server-Side Remediation Toolkit** used to eradicate five concurrent malware families from a live UK Airport Transfer & Dispatch platform on shared/cPanel Linux hosting.
 
-### Key Symptoms Investigated
+### 🚕 High-Stakes Production Constraints
+* **Live Revenue System (25+ Bookings / Day):** The platform processes **25+ daily airport transfer bookings** around the clock via an integrated custom booking engine (`/eto/`) and custom WordPress dispatch plugin.
+* **Zero Data-Loss Requirement:** Simply wiping the hosting account or restoring an old snapshot was **not** an option—every live booking, custom pricing route, vehicle configuration, and the custom booking application had to be 100% preserved during remediation.
+
+### Key Technical Symptoms Investigated
 1. **Silent Administrator Demotion:** Legitimate Administrators could log in at `wp-login.php`, but their `wp-admin` dashboard had no Administrator privileges (`user_level` demoted to `2` / `Author`).
 2. **Undeletable Files (`chmod 0555` / `0444`):** Attempting to delete rogue plugins in cPanel File Manager failed silently, and moving folders to cPanel Trash caused `FileOp Failure: Directory not empty`.
-3. **5-Minute Self-Resurrection (Even With `index.php` Disabled):** Deleting the rogue plugins or renaming `index.php` did not stop the infection—every 5 minutes, `wp-config.php` bloated back to `4.01 MB` and a `221 KB` web shell regenerated in the webroot with `0444` permissions.
+3. **5-Minute Self-Resurrection via Hidden Linux Cron Jobs (Even With `index.php` Disabled):** Deleting the rogue plugins or renaming `index.php` did not stop the infection—every 5 minutes, hidden cPanel/Linux `crontab` jobs executed standalone PHP daemons outside `public_html` (`~/.4cf380a5/196bea15.php` and `/tmp/400440af`), bloating `wp-config.php` back to `4.01 MB` and regenerating a `221 KB` web shell in the webroot with `0444` permissions.
 
 ---
 
